@@ -3,6 +3,7 @@ package com.aninfo.integration.cucumber;
 import com.aninfo.exceptions.DepositNegativeSumException;
 import com.aninfo.exceptions.InsufficientFundsException;
 import com.aninfo.model.Account;
+import com.aninfo.model.Transaction;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
@@ -10,14 +11,15 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AccountOperationsTest extends AccountIntegrationServiceTest {
 
     private Account account;
     private InsufficientFundsException ife;
     private DepositNegativeSumException dnse;
+
+    private long transactionCount;
 
     @Before
     public void setup() {
@@ -41,6 +43,7 @@ public class AccountOperationsTest extends AccountIntegrationServiceTest {
     @When("^Trying to deposit (.*)$")
     public void trying_to_deposit(int sum) {
         try {
+            this.transactionCount = getTransactions().stream().count();
             account = deposit(account, Double.valueOf(sum));
         } catch (DepositNegativeSumException dnse) {
             this.dnse = dnse;
@@ -71,4 +74,26 @@ public class AccountOperationsTest extends AccountIntegrationServiceTest {
     public void tearDown() {
         System.out.println("After all test execution");
     }
+
+    @Then("^transaction count should increase$")
+    public void transactionCountShouldIncrease() {
+        assertNotEquals(this.transactionCount, getTransactions().stream().count());
+    }
+
+    @Then("^transaction balance should be (.*)$")
+    public void transactionBalanceShouldBe(Double balance) {
+        Transaction lastElement = null;
+
+        for (Transaction element : getTransactions()) {
+            lastElement = element;
+        }
+
+
+        if (lastElement == null) {
+            fail();
+        } else {
+            assertEquals(lastElement.getBalance(), balance);
+        }
+    }
+
 }
