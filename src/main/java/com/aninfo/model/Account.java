@@ -9,7 +9,7 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long cbu;
 
-    private Double balance;
+    private Double balance = 0.0;
 
     public Account(){
     }

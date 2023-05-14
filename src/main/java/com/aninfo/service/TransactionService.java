@@ -2,45 +2,49 @@ package com.aninfo.service;
 
 import com.aninfo.exceptions.DepositNegativeSumException;
 import com.aninfo.exceptions.InsufficientFundsException;
-import com.aninfo.model.Account;
 import com.aninfo.model.Transaction;
-import com.aninfo.repository.AccountRepository;
-import com.aninfo.service.TransactionService;
+import com.aninfo.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-public class AccountService {
+public class TransactionService {
 
     @Autowired
-    private AccountRepository accountRepository;
-    @Autowired
-    private TransactionService transactionService;
+    private TransactionRepository transactionRepository;
 
-    public Account createAccount(Account account) {
-        return accountRepository.save(account);
+    public Transaction createAccount(Transaction transaction) {
+        return transactionRepository.save(transaction);
     }
 
-    public Collection<Account> getAccounts() {
-        return accountRepository.findAll();
+    public Collection<Transaction> getTransactions() {
+        return transactionRepository.findAll();
     }
 
-    public Optional<Account> findById(Long cbu) {
-        return accountRepository.findById(cbu);
+    public Optional<Transaction> findById(Long id) {
+        return transactionRepository.findById(id);
     }
 
-    public void save(Account account) {
-        accountRepository.save(account);
+    public void save(Transaction transaction) {
+        transactionRepository.save(transaction);
     }
 
-    public void deleteById(Long cbu) {
-        accountRepository.deleteById(cbu);
+    public void deleteById(Long id) {
+        transactionRepository.deleteById(id);
     }
 
+    public Collection<Transaction> getTransactionsByCbu(Long cbu) {
+        Collection<Transaction> transactions = transactionRepository.findAll();
+        transactions.removeIf(p -> p.getCbu() != cbu);
+        return transactions;
+    }
+
+    /*
     @Transactional
     public Account withdraw(Long cbu, Double sum) {
         Account account = accountRepository.findAccountByCbu(cbu);
@@ -49,13 +53,8 @@ public class AccountService {
             throw new InsufficientFundsException("Insufficient funds");
         }
 
-        Transaction transaction = new Transaction(cbu, -sum);
-
-        transactionService.save(transaction);
-
         account.setBalance(account.getBalance() - sum);
         accountRepository.save(account);
-
 
         return account;
     }
@@ -73,16 +72,13 @@ public class AccountService {
         if (extra > 500) {
             extra = 500.0;
         }
-        
+
         Account account = accountRepository.findAccountByCbu(cbu);
         account.setBalance(account.getBalance() + sum + extra);
         accountRepository.save(account);
 
-
-        Transaction transaction = new Transaction(cbu, sum + extra);
-        transactionService.save(transaction);
-
         return account;
     }
+    */
 
 }
